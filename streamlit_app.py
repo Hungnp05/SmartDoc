@@ -26,7 +26,7 @@ from src.layers.vision_processing import VisionProcessingLayer
 from src.layers.knowledge_base import KnowledgeBaseLayer
 from src.layers.retrieval_reasoning import RetrievalReasoningLayer
 
-# ── Page Config ───────────────────────────────────────────────────────────────
+# Page Config
 
 st.set_page_config(
     page_title="SmartDoc-Insight",
@@ -35,8 +35,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Styling ───────────────────────────────────────────────────────────────────
-
+# Styling
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
@@ -260,7 +259,7 @@ hr { border-color: var(--border) !important; }
 """, unsafe_allow_html=True)
 
 
-# ── Session State Init ────────────────────────────────────────────────────────
+# Session State Init
 
 def init_session():
     defaults = {
@@ -275,7 +274,7 @@ def init_session():
             st.session_state[k] = v
 
 
-# ── System Initialization ─────────────────────────────────────────────────────
+# System Initialization
 
 @st.cache_resource(show_spinner=False)
 def load_rag_system():
@@ -287,7 +286,7 @@ def load_rag_system():
     return ollama, vision, kb, rag
 
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+# Sidebar
 
 def render_sidebar(ollama, kb, rag):
     with st.sidebar:
@@ -392,84 +391,79 @@ def render_sidebar(ollama, kb, rag):
         )
 
 
-# ── Document Processing ───────────────────────────────────────────────────────
+# Document Processing
 
-def process_document(uploaded_file, kb):
-    """Handle document upload and processing pipeline."""
+def process_document(uploaded_file, kb, vision):
     st.session_state.processing = True
-
-    # Save to disk
     save_path = config.paths["uploads"] / uploaded_file.name
+
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    # Processing UI
     with st.sidebar:
-        progress_container = st.container()
-
-    with progress_container:
-        st.markdown("**Processing Pipeline:**")
         status_text = st.empty()
         progress_bar = st.progress(0)
-
-        steps = [
-            (0.1, "📄 Loading document..."),
-            (0.3, "🔍 Analyzing layout..."),
-            (0.5, "📊 Extracting tables → Markdown..."),
-            (0.65, "📈 Describing charts with LLaVA..."),
-            (0.8, "🔢 Generating embeddings..."),
-            (0.9, "💾 Storing in ChromaDB..."),
-            (1.0, "✅ Complete!"),
-        ]
+        error_container = st.empty()
 
         try:
-            ollama, vision, _, _ = load_rag_system()
-
-            # Vision processing
-            step_idx = 0
-            def update_progress(page_idx, total_pages, msg):
-                nonlocal step_idx
+            def vision_progress(page_idx, total_pages, msg):
                 frac = min(0.7, (page_idx / max(total_pages, 1)) * 0.7)
                 progress_bar.progress(0.1 + frac)
-                status_text.markdown(f"🔍 {msg}")
+                status_text.text(msg)
 
-            status_text.markdown(steps[0][1])
-            progress_bar.progress(steps[0][0])
+            def kb_progress(msg):
+                status_text.text(msg)
+
+            status_text.text("Loading document...")
+            progress_bar.progress(0.1)
 
             processed_doc = vision.process_document(
                 save_path,
-                progress_callback=update_progress,
+                progress_callback=vision_progress
             )
 
-            status_text.markdown("🔢 Generating embeddings...")
-            progress_bar.progress(0.8)
-
-            def kb_progress(msg):
-                status_text.markdown(f"💾 {msg}")
-
-            chunk_count = kb.ingest_document(processed_doc, progress_callback=kb_progress)
-
-            progress_bar.progress(1.0)
-            status_text.markdown(f"✅ Done! {chunk_count} chunks indexed")
-
-            st.success(f"✅ '{uploaded_file.name}' processed: {chunk_count} chunks")
-
-            # Summary stats
+            total_regions = len(processed_doc.all_regions())
             region_types = {}
             for region in processed_doc.all_regions():
                 region_types[region.region_type] = region_types.get(region.region_type, 0) + 1
 
-            type_summary = " | ".join([f"{k}: {v}" for k, v in region_types.items()])
-            st.info(f"Regions detected: {type_summary}")
+            if total_regions == 0:
+                error_container.error(
+                    "0 regions detected. Possible causes:\n"
+                    "1. PaddleOCR not installed correctly\n"
+                    "2. PDF has no extractable text\n"
+                    "Check terminal for error details."
+                )
+                st.session_state.processing = False
+                return
+
+            progress_bar.progress(0.8)
+            status_text.text(f"Generating embeddings for {total_regions} regions...")
+
+            chunk_count = kb.ingest_document(processed_doc, progress_callback=kb_progress)
+
+            progress_bar.progress(1.0)
+
+            if chunk_count == 0:
+                error_container.error("Embedding failed — check Ollama is running and nomic-embed-text is pulled.")
+                st.session_state.processing = False
+                return
+
+            status_text.text(f"Done. {chunk_count} chunks indexed.")
+            summary = " | ".join([f"{k}: {v}" for k, v in region_types.items()])
+            st.success(f"Processed: {chunk_count} chunks")
+            st.info(f"Regions: {summary}")
 
         except Exception as e:
-            st.error(f"❌ Processing failed: {e}")
+            import traceback
+            error_container.error(f"Error: {e}")
+            st.text(traceback.format_exc())
             logging.exception("Document processing error")
         finally:
             st.session_state.processing = False
 
 
-# ── Chat Interface ────────────────────────────────────────────────────────────
+# Chat Interface
 
 def render_chat(rag):
     """Main chat area with message history and streaming responses."""
@@ -609,7 +603,7 @@ def render_sources(sources):
             st.markdown("---")
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# Main
 
 def main():
     init_session()
