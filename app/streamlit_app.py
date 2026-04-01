@@ -484,29 +484,10 @@ def render_chat(rag):
     # Welcome message
     if not st.session_state.messages:
         st.markdown("""
-        <div style="text-align:center; padding: 3rem 1rem; color: #4a4d66;">
+        <div style="text-align:center; padding: 1rem 1rem; color: #4a4d66;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">🧠</div>
             <div style="font-family: Space Mono; font-size: 0.9rem; color: #6b6f88; margin-bottom: 2rem;">
                 Upload a PDF to begin. I can analyze text, tables, and charts.
-            </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0 2rem 0;">
-            <div style="background:#13141e; border:1px solid #2a2d3e; border-radius:10px; padding:1rem; border-left:3px solid #00e5ff;">
-                <div style="font-family:Space Mono; font-size:0.7rem; color:#00e5ff; margin-bottom:0.4rem;">📊 TABLE QUERY</div>
-                <div style="font-size:0.85rem; color:#8b8fa8;">"Doanh thu quý 3 tăng bao nhiêu so với quý 2?"</div>
-            </div>
-            <div style="background:#13141e; border:1px solid #2a2d3e; border-radius:10px; padding:1rem; border-left:3px solid #7c3aed;">
-                <div style="font-family:Space Mono; font-size:0.7rem; color:#7c3aed; margin-bottom:0.4rem;">📈 CHART QUERY</div>
-                <div style="font-size:0.85rem; color:#8b8fa8;">"Xu hướng tăng trưởng trong biểu đồ là gì?"</div>
-            </div>
-            <div style="background:#13141e; border:1px solid #2a2d3e; border-radius:10px; padding:1rem; border-left:3px solid #10b981;">
-                <div style="font-family:Space Mono; font-size:0.7rem; color:#10b981; margin-bottom:0.4rem;">📝 TEXT QUERY</div>
-                <div style="font-size:0.85rem; color:#8b8fa8;">"Tóm tắt những rủi ro chính được đề cập?"</div>
-            </div>
-            <div style="background:#13141e; border:1px solid #2a2d3e; border-radius:10px; padding:1rem; border-left:3px solid #f59e0b;">
-                <div style="font-family:Space Mono; font-size:0.7rem; color:#f59e0b; margin-bottom:0.4rem;">🔢 COMPARE QUERY</div>
-                <div style="font-size:0.85rem; color:#8b8fa8;">"So sánh hiệu suất năm 2023 và 2024?"</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -692,18 +673,9 @@ def render_about():
     | C - Reasoning | Cross-encoder + Llama3-8B | Re-rank + generate answers |
     | D - Interface | Streamlit | This UI |
 
-    #### Why better than standard RAG?
-
-    | Metric | Standard RAG | SmartDoc-Insight |
-    |--------|-------------|-----------------|
-    | Table QA | ~52% | **~91%** |
-    | Chart Understanding | 0% | **~78%** |
-    | Mixed Content | ~61% | **~89%** |
-
     #### Tech Stack
     `Python` · `PaddleOCR` · `LLaVA-7B` · `Llama3-8B` · `ChromaDB` · `LangChain` · `Ollama` · `Streamlit` · `Docker`
     """)
-
 
 if __name__ == "__main__":
     main()
