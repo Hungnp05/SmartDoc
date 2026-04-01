@@ -193,24 +193,7 @@ Below are the benchmark results on the sample document `sample_report.pdf` (8 re
 
 Full benchmark results are saved to `results.json` after each run.
 
-### How to Run the Benchmark
 
-```bash
-python scripts/benchmark.py --doc data/uploads/sample_report.pdf --output results.json
-
----
-
-## Privacy
-All processing is **100% local**. No data leaves your machine. No API keys required.
-
-
-
-
-# SmartDoc-Insight
-
-Multi-Modal RAG for Complex Documents. Runs entirely local, no paid API required.
-
----
 
 ## System Requirements
 
