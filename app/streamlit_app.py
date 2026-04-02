@@ -473,29 +473,22 @@ def render_chat(rag):
 
     # Header
     st.markdown("""
-    <div class="smartdoc-header">
-        <div>
+    <div class="smartdoc-header" 
+        style="display: flex; justify-content: center; width: 100%;">
+        <div style="text-align: center;">
             <div class="smartdoc-logo">SmartDoc-Insight</div>
             <div class="smartdoc-tagline">MULTI-MODAL RAG · LOCAL-FIRST · TABLE-AWARE</div>
+            <div style="font-family: Space Mono; font-size: 0.9rem; color: #6b6f88; margin-bottom: 0.5rem;">
+                Upload a PDF to begin. I can analyze text, tables, and charts.
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Welcome message
-    if not st.session_state.messages:
-        st.markdown("""
-        <div style="text-align:center; padding: 1rem 1rem; color: #4a4d66;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;"></div>
-            <div style="font-family: Space Mono; font-size: 0.9rem; color: #6b6f88; margin-bottom: 2rem;">
-                Upload a PDF to begin. I can analyze text, tables, and charts.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
     # Message History
     for msg in st.session_state.messages:
         if msg["role"] == "user":
-            st.markdown(f'<div class="chat-message-user">💬 {msg["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="chat-message-user"> {msg["content"]}</div>', unsafe_allow_html=True)
         else:
             with st.container():
                 st.markdown(f'<div class="chat-message-assistant">{msg["content"]}</div>', unsafe_allow_html=True)
