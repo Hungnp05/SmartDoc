@@ -99,18 +99,16 @@ class RerankerConfig:
 
 
 # RAG Prompt Templates
-SYSTEM_PROMPT = """Bạn là SmartDoc-Insight, một trợ lý phân tích tài liệu thông minh.
-Nhiệm vụ của bạn là trả lời câu hỏi DỰA TRÊN và CHỈ DỰA TRÊN các đoạn thông tin được cung cấp.
+SYSTEM_PROMPT = """You are SmartDoc-Insight, an intelligent document analysis assistant.
+Your task is to answer questions BASED ON and ONLY BASED ON the provided information snippets.
 
-Nguyên tắc:
-1. Chỉ sử dụng thông tin từ context được cung cấp. Không bịa đặt.
-2. Nếu thông tin không đủ, hãy nói rõ "Tài liệu không chứa đủ thông tin để trả lời câu hỏi này."
-3. Khi trích dẫn bảng biểu, hãy giải thích rõ ràng các con số.
-4. Khi trích dẫn bảng biểu, hãy đọc theo HÀNG - mỗi hàng là một bản ghi riêng biệt.
-5. Khi trích dẫn biểu đồ, hãy nêu xu hướng và các điểm dữ liệu quan trọng.
-6. Không nhầm lẫn số liệu giữa các cột khác nhau trong cùng một bảng.
-7. Khi không chắc chắn về một con số, hãy nói rõ nguồn: 'Theo bảng X, trang Y...'
-8. Trả lời bằng ngôn ngữ của câu hỏi (Tiếng Việt hoặc Tiếng Anh).
+Principles:
+1. Use only the information from the provided context. Do not hallucinate or make things up.
+2. If the information is insufficient, clearly state it in the user's language.
+3. When citing tables, read by ROWS — each row is a distinct record. Do not mix up values between columns.
+4. When citing charts, describe trends and key data points.
+5. If uncertain about a figure, specify the source: 'According to Table X, Page Y...'.
+6. CRITICAL — Language rule: You MUST reply in the SAME language as the question. If the question is in Vietnamese, your ENTIRE answer must be in Vietnamese. If in English, answer in English. This rule overrides everything else.
 """
 
 RAG_PROMPT_TEMPLATE = """<context>
@@ -121,21 +119,24 @@ RAG_PROMPT_TEMPLATE = """<context>
 {question}
 </question>
 
-Dựa vào các đoạn thông tin trong <context>, hãy trả lời câu hỏi trong <question> một cách chính xác và đầy đủ.
-Nếu context chứa bảng biểu hoặc mô tả biểu đồ, hãy phân tích và trích dẫn các số liệu cụ thể.
+<language_instruction>
+{language_instruction}
+</language_instruction>
+
+Answer the question using ONLY the information in <context>. Follow the language rule in <language_instruction> strictly.
+If the context contains tables or chart descriptions, analyze and cite specific figures.
 """
 
-CHART_DESCRIPTION_PROMPT = """Hãy phân tích và mô tả chi tiết biểu đồ/hình ảnh này.
-Tập trung vào:
-1. Loại biểu đồ (cột, đường, tròn, v.v.)
-2. Tiêu đề và nhãn trục (nếu có)
-3. Xu hướng chính và các điểm dữ liệu quan trọng
-4. So sánh giữa các yếu tố (nếu có)
-5. Kết luận hoặc insight chính từ dữ liệu
+CHART_DESCRIPTION_PROMPT = """Please analyze and describe this chart/image in detail.
+Focus on:
+1. Chart type (bar, line, pie, etc.)
+2. Title and axis labels (if available)
+3. Main trends and key data points
+4. Comparisons between elements (if any)
+5. Main conclusions or insights from the data
 
-Trả lời bằng văn bản mô tả ngắn gọn, súc tích, phù hợp để lưu vào cơ sở tri thức.
+Provide a concise descriptive response suitable for storage in a knowledge base.
 """
-
 
 # App Settings
 @dataclass
