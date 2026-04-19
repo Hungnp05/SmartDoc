@@ -467,3 +467,6 @@ If you encounter an error that cannot be resolved, run the diagnostic script and
 ```
 py debug.py
 ```
+
+## Note
+Note: Due to hardware limitations, this project runs in continuous model swapping in VRAM. This is the main reason why local RAG systems run extremely slowly if you don't have enough VRAM to accommodate both models simultaneously.
